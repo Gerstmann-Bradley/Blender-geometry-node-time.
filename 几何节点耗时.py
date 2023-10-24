@@ -1,9 +1,9 @@
 bl_info = {
-    "name" : "几何节点耗时",
-    "author" : "一尘不染", 
+    "name" : "Geometry Node Execution Time",
+    "author" : "CleanSlate",
     "blender" : (3, 0, 0),
     "version" : (1, 3, 0),
-    "category" : "Node" 
+    "category" : "Node"
 }
 
 import bpy
@@ -33,8 +33,8 @@ def add_to_node_pt_overlay_show_time(self, context):
     if context.area.ui_type == 'GeometryNodeTree':
         layout = self.layout
         layout.separator(factor=0.5)
-        layout.prop(addon_prefs, 'show_in_header', text='标题栏显示总耗时')
-        layout.prop(addon_prefs, 'show_in_interface', text='界面显示总耗时')
+        layout.prop(addon_prefs, 'show_in_header', text='Show in Header')
+        layout.prop(addon_prefs, 'show_in_interface', text='Show in Interface')
 
 def get_gn_execution_time():
     try:
@@ -101,8 +101,8 @@ def draw_time_in_interface():
 
 class AddonPreferences_Show_GN_Time(bpy.types.AddonPreferences):
     bl_idname = __name__
-    show_in_header:    props.BoolProperty(name='Show_in_Header', description='显示在标题栏', default=True)
-    show_in_interface: props.BoolProperty(name='Show_in_Interface', description='显示在界面里', default=False, 
+    show_in_header:    props.BoolProperty(name='Show_in_Header', description='Show_in_Header', default=True)
+    show_in_interface: props.BoolProperty(name='Show_in_Interface', description='Show_in_Interface', default=False, 
                                           update=update_show_in_interface)
     font_size:         props.IntProperty(name='Font_Size', description='', default=20, subtype='NONE')
     font_color:        props.FloatVectorProperty(name='Font_Color', description='', size=4, default=(0.0, 0.0, 0.0, 1.0), 
@@ -119,42 +119,43 @@ class AddonPreferences_Show_GN_Time(bpy.types.AddonPreferences):
                                                    ('Top Right', 'Top Right', '', 0, 3) ])
     position_offect:   props.IntVectorProperty(name='Position_Offect', description='', size=2, default=(0, 0), subtype='NONE')
 
-    def draw(self, context):  # 必须这样？
+def draw(self, context):
+    # Need to do this?
     # def draw(self):
-        addon_prefs = context.preferences.addons[__name__].preferences
-        layout = self.layout 
-        
-        split_0 = layout.split(factor=0.5)
-        split_0.label(text='显示在标题栏:')
-        split_0.prop(addon_prefs, 'show_in_header', text='', icon_value=0, emboss=True)
-        
-        split_0 = layout.split(factor=0.5)
-        split_0.label(text='显示在界面里:')
-        split_0.prop(addon_prefs, 'show_in_interface', text='')
-        
-        split_1 = layout.split(factor=0.5)
-        split_1.label(text='字体大小:')
-        split_1.prop(addon_prefs, 'font_size', text='', icon_value=0, emboss=True)
-        
-        split_2 = layout.split(factor=0.5)
-        split_2.label(text='字体颜色:')
-        split_2.prop(addon_prefs, 'font_color', text='')
-        
-        split_3 = layout.split(factor=0.5)
-        split_3.label(text='字体类型:')
-        split_3.prop(addon_prefs, 'font_type', text='')
-        
-        split_4 = layout.split(factor=0.5)
-        split_4.label(text='数字位数:')
-        split_4.prop(addon_prefs, 'time_length', text='')
-        
-        split_5 = layout.split(factor=0.5)
-        split_5.label(text='位置角落:')
-        split_5.prop(addon_prefs, 'position_corner', text='')
-        
-        split_6 = layout.split(factor=0.5)
-        split_6.label(text='位置偏移:')
-        split_6.prop(addon_prefs, 'position_offect', text='')
+    addon_prefs = context.preferences.addons[__name__].preferences
+    layout = self.layout
+
+    split_0 = layout.split(factor=0.5)
+    split_0.label(text='Show in Header:')
+    split_0.prop(addon_prefs, 'show_in_header', text='', icon_value=0, emboss=True)
+
+    split_0 = layout.split(factor=0.5)
+    split_0.label(text='Show in Interface:')
+    split_0.prop(addon_prefs, 'show_in_interface', text='')
+
+    split_1 = layout.split(factor=0.5)
+    split_1.label(text='Font Size:')
+    split_1.prop(addon_prefs, 'font_size', text='', icon_value=0, emboss=True)
+
+    split_2 = layout.split(factor=0.5)
+    split_2.label(text='Font Color:')
+    split_2.prop(addon_prefs, 'font_color', text='')
+
+    split_3 = layout.split(factor=0.5)
+    split_3.label(text='Font Type:')
+    split_3.prop(addon_prefs, 'font_type', text='')
+
+    split_4 = layout.split(factor=0.5)
+    split_4.label(text='Number Length:')
+    split_4.prop(addon_prefs, 'time_length', text='')
+
+    split_5 = layout.split(factor=0.5)
+    split_5.label(text='Position Corner:')
+    split_5.prop(addon_prefs, 'position_corner', text='')
+
+    split_6 = layout.split(factor=0.5)
+    split_6.label(text='Position Offset:')
+    split_6.prop(addon_prefs, 'position_offect', text='')
 
 @persistent
 def load_post_handler_draw(dummy):
