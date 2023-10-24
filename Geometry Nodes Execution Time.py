@@ -1,10 +1,10 @@
 # Metadata about the add-on
 bl_info = {
-    "name" : "Geometry Node Execution Time",
-    "author" : "一尘不染",  # Author's name (一尘不染 in this case)
-    "blender" : (3, 0, 0),  # Compatible Blender version
-    "version" : (1, 3, 0),  # Version of the add-on
-    "category" : "Node"  # Category where the add-on is located
+    "name": "Geometry Node Execution Time",
+    "author": "一尘不染",  # Author's name (一尘不染 in this case)
+    "blender": (3, 0, 0),  # Compatible Blender version
+    "version": (1, 3, 0),  # Version of the add-on
+    "category": "Node"  # Category where the add-on is located
 }
 
 # Import necessary modules
@@ -26,7 +26,7 @@ def update_show_in_interface(self, context):
             if handler_time:
                 bpy.types.SpaceNodeEditor.draw_handler_remove(handler_time[0], 'WINDOW')
                 handler_time.pop(0)
-                for a in context.screen.areas: 
+                for a in context.screen.areas:
                     a.tag_redraw()
 
 # Initialize a list to store draw handler information
@@ -88,10 +88,10 @@ def draw_time_in_interface():
                 'Top Left': (50, height),
                 'Bottom Left': (50, 50)
             }
-            x_offect, y_offect = tuple(mathutils.Vector(corner[position_corner]) + mathutils.Vector(addon_prefs.position_offect))
-            blf.position(font_id, x_offect, y_offect, 0)
+            x_offset, y_offset = tuple(mathutils.Vector(corner[position_corner]) + mathutils.Vector(addon_prefs.position_offset))
+            blf.position(font_id, x_offset, y_offset, 0)
             if bpy.app.version >= (3, 4, 0):
-                blf.size(font_id, addon_prefs.font_size)
+                blf.size(font_id, 12)
             else:
                 blf.size(font_id, addon_prefs.font_size, 72)
             clr = addon_prefs.font_color
@@ -110,23 +110,20 @@ def draw_time_in_interface():
 # Define preferences for the add-on
 class AddonPreferences_Show_GN_Time(bpy.types.AddonPreferences):
     bl_idname = __name__
-    show_in_header:    props.BoolProperty(name='Show_in_Header', description='Show in Header', default=True)
-    show_in_interface: props.BoolProperty(name='Show_in_Interface', description='Show_in_Interface', default=False, 
-                                          update=update_show_in_interface)
-    font_size:         props.IntProperty(name='Font_Size', description='', default=20, subtype='NONE')
-    font_color:        props.FloatVectorProperty(name='Font_Color', description='', size=4, default=(1, 1, 1, 1.0), 
-                                                 subtype='COLOR', unit='NONE', min=0.0, max=1.0, step=3, precision=6)
-    font_type:         props.StringProperty(name='Font_Type', description='', default='', subtype='FILE_PATH', maxlen=0)
-    time_length:       props.IntProperty(name='Time_Length', description='', default=5, subtype='NONE', min=2, max=10)
+    show_in_header: props.BoolProperty(name='Show in Header', description='Show in Header', default=True)
+    show_in_interface: props.BoolProperty(name='Show in Interface', description='Show in Interface', default=False,
+                                         update=update_show_in_interface)
+    font_size: props.IntProperty(name='Font Size', description='', default=20, subtype='NONE')
+    font_color: props.FloatVectorProperty(name='Font Color', description='', size=4, default=(1, 1, 1, 1.0),
+                                         subtype='COLOR', unit='NONE', min=0.0, max=1.0, step=3, precision=6)
+    font_type: props.StringProperty(name='Font Type', description='', default='', subtype='FILE_PATH', maxlen=0)
+    time_length: props.IntProperty(name='Time Length', description='', default=5, subtype='NONE', min=2, max=10)
 
-    def position_corner_enum_items(self, context):
-        return [("No Items", "No Items", "No generate enum items node found to create items!", "ERROR", 0)]
-    position_corner:   props.EnumProperty(name='Position_Corner', description='', 
-                                            items=[('Bottom Left', 'Bottom Left', '', 0, 0), 
-                                                   ('Top Left', 'Top Left', '', 0, 1), 
-                                                   ('Bottom Right', 'Bottom Right', '', 0, 2),
-                                                   ('Top Right', 'Top Right', '', 0, 3) ])
-    position_offect:   props.IntVectorProperty(name='Position_Offect', description='', size=2, default=(0, 0), subtype='NONE')
+    position_corner_enum_items = [
+        ("Top Left", "Top Left", "", 0, 1)
+    ]
+    position_corner: props.EnumProperty(name='Position Corner', description='', items=position_corner_enum_items)
+    position_offset: props.IntVectorProperty(name='Position Offset', description='', size=2, default=(-35, -25), subtype='NONE')
 
 # Function to draw the preferences in Blender's Preferences panel
 def draw(self, context):
@@ -163,7 +160,7 @@ def draw(self, context):
 
     split_6 = layout.split(factor=0.5)
     split_6.label(text='Position Offset:')
-    split_6.prop(addon_prefs, 'position_offect', text='')
+    split_6.prop(addon_prefs, 'position_offset', text='')
 
 # Function to handle events after loading the file
 @persistent
@@ -174,7 +171,7 @@ def load_post_handler_draw(dummy):
 # Function to start drawing execution time
 def function_start_draw_gn_time():
     handler_time.append(bpy.types.SpaceNodeEditor.draw_handler_add(draw_time_in_interface, (), 'WINDOW', 'POST_PIXEL'))
-    for a in bpy.context.screen.areas: 
+    for a in bpy.context.screen.areas:
         a.tag_redraw()
 
 # Register the add-on
@@ -193,3 +190,6 @@ def unregister():
     if handler_time:
         bpy.types.SpaceNodeEditor.draw_handler_remove(handler_time[0], 'WINDOW')
         handler_time.pop(0)
+
+if __name__ == "__main__":
+    register()
