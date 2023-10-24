@@ -126,7 +126,7 @@ class AddonPreferences_Show_GN_Time(bpy.types.AddonPreferences):
                                                    ('Top Left', 'Top Left', '', 0, 1), 
                                                    ('Bottom Right', 'Bottom Right', '', 0, 2),
                                                    ('Top Right', 'Top Right', '', 0, 3) ])
-    position_offect:   props.IntVectorProperty(name='Position_Offect', description='', size=2, default=(0, 0), subtype='NONE')
+    position_offset:   props.IntVectorProperty(name='Position_Offset', description='', size=2, default=(0, 1), subtype='NONE')
 
 # Function to draw the preferences in Blender's Preferences panel
 def draw(self, context):
