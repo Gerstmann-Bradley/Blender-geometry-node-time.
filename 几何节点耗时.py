@@ -1,6 +1,6 @@
 bl_info = {
     "name" : "Geometry Node Execution Time",
-    "author" : "CleanSlate",
+    "author" : "一尘不染",
     "blender" : (3, 0, 0),
     "version" : (1, 3, 0),
     "category" : "Node"
