@@ -126,7 +126,7 @@ class AddonPreferences_Show_GN_Time(bpy.types.AddonPreferences):
                                                    ('Top Left', 'Top Left', '', 0, 1), 
                                                    ('Bottom Right', 'Bottom Right', '', 0, 2),
                                                    ('Top Right', 'Top Right', '', 0, 3) ])
-    position_offset:   props.IntVectorProperty(name='Position_Offset', description='', size=2, default=(0, 1), subtype='NONE')
+    position_offect:   props.IntVectorProperty(name='Position_offect', description='', size=2, default=(0, 1), subtype='NONE')
 
 # Function to draw the preferences in Blender's Preferences panel
 def draw(self, context):
@@ -162,7 +162,7 @@ def draw(self, context):
     split_5.prop(addon_prefs, 'position_corner', text='')
 
     split_6 = layout.split(factor=0.5)
-    split_6.label(text='Position Offset:')
+    split_6.label(text='Position offect:')
     split_6.prop(addon_prefs, 'position_offect', text='')
 
 # Function to handle events after loading the file
