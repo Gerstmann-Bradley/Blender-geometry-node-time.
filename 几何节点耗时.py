@@ -2,8 +2,8 @@
 bl_info = {
     "name": "Geometry Node Execution Time",
     "author": "一尘不染",
-    "blender": (3, 0, 0),
-    "version": (1, 4, 0),
+    "blender": (4, 0, 0),
+    "version": (2, 0, 0),
     "category": "Node"
 }
 
@@ -15,7 +15,6 @@ import mathutils
 from bpy.app.handlers import persistent
 
 # Hardcoded configuration
-DRAW_IN_INTERFACE = True
 FONT_SIZE = 20
 FONT_COLOR = (1, 1, 1, 1.0)
 FONT_TYPE_PATH = ""
@@ -26,19 +25,27 @@ POSITION_OFFSET = (-35, -25)
 # Initialize a list to store draw handler information
 handler_time = []
 
-# Function to get the execution time of the Geometry Nodes
+# Property to control toggle
+def register_properties():
+    bpy.types.Scene.show_gn_execution_time = bpy.props.BoolProperty(
+        name="GN Execution Time",
+        description="Show Geometry Node modifier execution time",
+        default=True,
+        update=lambda self, context: update_draw_handler()
+    )
+
+def unregister_properties():
+    del bpy.types.Scene.show_gn_execution_time
+
+# Function to get the execution time of the active Geometry Nodes modifier
 def get_gn_execution_time():
     try:
         context = bpy.context
-        tree = context.space_data.edit_tree
         active = context.object.modifiers.active
-        for modifier in context.object.modifiers:
-            if modifier.type == "NODES" and modifier.node_group.name == tree.name:
-                mod_name = modifier.name
-        if active.name == mod_name:
+        if active and active.type == "NODES":
             depsgraph = context.evaluated_depsgraph_get()
             evaluated_obj = context.object.evaluated_get(depsgraph)
-            modifier = evaluated_obj.modifiers[mod_name]
+            modifier = evaluated_obj.modifiers[active.name]
             time = modifier.execution_time
             return str(time * 1000)[:TIME_LENGTH] + "ms"
     except:
@@ -47,6 +54,9 @@ def get_gn_execution_time():
 # Function to draw execution time information in the interface
 def draw_time_in_interface():
     context = bpy.context
+    if not context.scene.show_gn_execution_time:
+        return
+
     if context.area.ui_type == 'GeometryNodeTree':
         font_id = 0
         if FONT_TYPE_PATH and os.path.exists(FONT_TYPE_PATH):
@@ -73,39 +83,40 @@ def draw_time_in_interface():
         blf.draw(font_id, get_gn_execution_time())
         blf.disable(font_id, blf.WORD_WRAP)
 
-# Function to update the draw handler based on config
+# Function to update the draw handler based on the toggle
 def update_draw_handler():
-    if DRAW_IN_INTERFACE:
-        function_start_draw_gn_time()
-    else:
-        for i in range(2):
-            if handler_time:
-                bpy.types.SpaceNodeEditor.draw_handler_remove(handler_time[0], 'WINDOW')
-                handler_time.pop(0)
-                for a in bpy.context.screen.areas:
-                    a.tag_redraw()
+    # Clear existing
+    while handler_time:
+        bpy.types.SpaceNodeEditor.draw_handler_remove(handler_time.pop(), 'WINDOW')
 
-# Function to add a label to the node editor overlay (basic static label only)
+    # Re-add if enabled
+    if bpy.context.scene.show_gn_execution_time:
+        handler_time.append(
+            bpy.types.SpaceNodeEditor.draw_handler_add(
+                draw_time_in_interface, (), 'WINDOW', 'POST_PIXEL'
+            )
+        )
+    for area in bpy.context.screen.areas:
+        area.tag_redraw()
+
+# Add the toggle to the overlay panel
 def add_to_node_pt_overlay_show_time(self, context):
     if context.area.ui_type == 'GeometryNodeTree':
         layout = self.layout
-        layout.label(text="GN Execution Time")
+        layout.prop(context.scene, "show_gn_execution_time")
 
-# Function to handle events after loading the file
+# Redraw after loading a file
 @persistent
 def load_post_handler_draw(dummy):
-    if DRAW_IN_INTERFACE:
-        function_start_draw_gn_time()
+    update_draw_handler()
 
-# Function to start drawing execution time
+# Start drawing
 def function_start_draw_gn_time():
-    if not handler_time:
-        handler_time.append(bpy.types.SpaceNodeEditor.draw_handler_add(draw_time_in_interface, (), 'WINDOW', 'POST_PIXEL'))
-        for a in bpy.context.screen.areas:
-            a.tag_redraw()
+    update_draw_handler()
 
 # Register the add-on
 def register():
+    register_properties()
     bpy.types.NODE_PT_overlay.append(add_to_node_pt_overlay_show_time)
     bpy.app.handlers.load_post.append(load_post_handler_draw)
     update_draw_handler()
@@ -114,9 +125,9 @@ def register():
 def unregister():
     bpy.types.NODE_PT_overlay.remove(add_to_node_pt_overlay_show_time)
     bpy.app.handlers.load_post.remove(load_post_handler_draw)
-    if handler_time:
-        bpy.types.SpaceNodeEditor.draw_handler_remove(handler_time[0], 'WINDOW')
-        handler_time.pop(0)
+    unregister_properties()
+    while handler_time:
+        bpy.types.SpaceNodeEditor.draw_handler_remove(handler_time.pop(), 'WINDOW')
 
 if __name__ == "__main__":
     register()
